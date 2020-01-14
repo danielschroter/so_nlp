@@ -8,6 +8,11 @@ from tensorflow.keras.layers import Dense, LSTM
 
 
 def create_model(embedding_dim=128):
+    """
+    creates and returns a simple LSTM model
+    :param embedding_dim: size of the input embeddings
+    :return: model
+    """
     model = Sequential()
     model.add(LSTM(32, input_shape=(None, embedding_dim)))
     model.add(Dense(32, activation="sigmoid"))
