@@ -2,4 +2,9 @@ Decisions,
 
 
 Data: 
-Every Answer with highest score vs every answer to certain question
+- Every Answer with highest score vs every answer to certain question
+- Entscheidung welche Tags verwendet werden. Abschneiden bei welchem Wert?
+
+Model
+- Start mit simple lstm
+- Embeddings statt Word2Vec durch Code2Vec ersetzen

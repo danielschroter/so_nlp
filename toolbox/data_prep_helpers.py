@@ -1,5 +1,38 @@
 import pandas as pd
 from bs4 import BeautifulSoup
+from nltk.tokenize import sent_tokenize, word_tokenize
+import gensim
+from gensim.models import Word2Vec
+
+
+def create_Word2Vec_embeddings(dataframe, textcolumn):
+    """
+    Code Citation: https://www.geeksforgeeks.org/python-word-embedding-using-word2vec/
+    :param dataframe: dataframe containg text which should be used for word-embedding
+    :param textcolumn: string that specifies the column containing training-text
+    :return: word_vectors as Word2VecKeyedVectors object( matrix containing similarity values)
+    """
+    str = " "
+    for i, row in dataframe.iterrows():
+        str = str + row[textcolumn]
+
+    f = str.replace("\n", " ")
+    data = []
+    for i in sent_tokenize(f):
+        temp = []
+
+        # tokenize the sentence into words
+        for j in word_tokenize(i):
+            temp.append(j.lower())
+
+        data.append(temp)
+
+    model = gensim.models.Word2Vec(data, min_count = 1, size = 100,
+                                                 window = 5, sg = 1)
+
+    # print(model.most_similar('python'))
+    word_vectors = model.wv
+    return word_vectors
 
 
 def load_data(data_path, drop_extra_columns=True):
