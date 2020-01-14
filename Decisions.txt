@@ -7,4 +7,5 @@ Data:
 
 Model
 - Start mit simple lstm
-- Embeddings statt Word2Vec durch Code2Vec ersetzen
+- Embeddings statt Word2Vec durch Code2Vec ersetzen: https://arxiv.org/pdf/1803.09473.pdf 
+
