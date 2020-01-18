@@ -5,6 +5,25 @@ import gensim
 from gensim.models import Word2Vec
 
 
+def sent_tokenize_text(txt):
+    """
+    tokenize a single body of text that may consist of multiple sentences. This function will usually be applied to
+    single question/answer bodies as data-preparation for training/applying embeddings
+    :param txt: string containing some text
+    :return: list of preprocessed single sentences
+    """
+    txt = ' '.join(txt.split())  # replaces all whitespace with single space (including line-breaks)
+    sents = sent_tokenize(txt)
+    sents = [s[:-1] for s in sents if s.endswith(".")]
+    sents = [s.replace(",", "") for s in sents]
+    return sents
+
+
+def word_tokenize_sent(s):
+    """tokenizes all words in a sentence (after lower-casing them)"""
+    return [w.lower() for w in word_tokenize(s)]
+
+
 def create_Word2Vec_embeddings(dataframe, textcolumn):
     """
     Code Citation: https://www.geeksforgeeks.org/python-word-embedding-using-word2vec/
@@ -12,21 +31,17 @@ def create_Word2Vec_embeddings(dataframe, textcolumn):
     :param textcolumn: string that specifies the column containing training-text
     :return: word_vectors as Word2VecKeyedVectors object( matrix containing similarity values)
     """
-    str = " "
+    sentences = []
     for i, row in dataframe.iterrows():
-        str = str + row[textcolumn]
+        txt = row[textcolumn]
+        sents = sent_tokenize_text(txt)
+        sentences += sents
 
-    f = str.replace("\n", " ")
     data = []
-    for i in sent_tokenize(f):
-        temp = []
-
-        # tokenize the sentence into words
-        for j in word_tokenize(i):
-            temp.append(j.lower())
-
-        data.append(temp)
-
+    print(sentences[:2])
+    for s in sentences:
+        data.append(word_tokenize_sent(s))
+    print(data[0])
     model = gensim.models.Word2Vec(data, min_count = 1, size = 100,
                                                  window = 5, sg = 1)
 
