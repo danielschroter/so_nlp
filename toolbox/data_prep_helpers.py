@@ -2,7 +2,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from nltk.tokenize import sent_tokenize, word_tokenize
 import gensim
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, FastText
 
 
 def sent_tokenize_text(txt):
@@ -24,13 +24,7 @@ def word_tokenize_sent(s):
     return [w.lower() for w in word_tokenize(s)]
 
 
-def create_Word2Vec_embeddings(dataframe, textcolumn):
-    """
-    Code Citation: https://www.geeksforgeeks.org/python-word-embedding-using-word2vec/
-    :param dataframe: dataframe containg text which should be used for word-embedding
-    :param textcolumn: string that specifies the column containing training-text
-    :return: word_vectors as Word2VecKeyedVectors object( matrix containing similarity values)
-    """
+def tokenize_text(dataframe, textcolumn):
     sentences = []
     for i, row in dataframe.iterrows():
         txt = row[textcolumn]
@@ -42,12 +36,29 @@ def create_Word2Vec_embeddings(dataframe, textcolumn):
     for s in sentences:
         data.append(word_tokenize_sent(s))
     print(data[0])
+    return data
+
+
+
+def create_Word2Vec_embeddings(dataframe, textcolumn):
+    """
+    Code Citation: https://www.geeksforgeeks.org/python-word-embedding-using-word2vec/
+    :param dataframe: dataframe containg text which should be used for word-embedding
+    :param textcolumn: string that specifies the column containing training-text
+    :return: word_vectors as Word2VecKeyedVectors object( matrix containing similarity values)
+    """
+    data = tokenize_text(dataframe, textcolumn)
     model = gensim.models.Word2Vec(data, min_count = 1, size = 100,
                                                  window = 5, sg = 1)
+    return model.wv
 
-    # print(model.most_similar('python'))
-    word_vectors = model.wv
-    return word_vectors
+
+def create_FastText_embeddings(dataframe, textcolumn):
+    data = tokenize_text(dataframe, textcolumn)
+    model = FastText(min_count=1, size=100, window=3)
+    model.build_vocab(sentences=data)
+    model.train(sentences= data, total_examples=len(data), epochs=10)
+    return model.wv
 
 
 def load_data(data_path, drop_extra_columns=True):
