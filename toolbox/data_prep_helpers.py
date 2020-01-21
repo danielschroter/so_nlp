@@ -1,4 +1,5 @@
 import pandas as pd
+import pickle
 from bs4 import BeautifulSoup
 from nltk.tokenize import sent_tokenize, word_tokenize
 import gensim
@@ -23,6 +24,11 @@ def sent_tokenize_text(txt):
 def word_tokenize_sent(s):
     """tokenizes all words in a sentence (after lower-casing them)"""
     return [w.lower() for w in word_tokenize(s)]
+
+
+def load_fasttext_embeddings(path):
+    with open(path, "rb") as in_file:
+        return pickle.load(in_file)
 
 
 def tokenize_text(dataframe, textcolumn):
