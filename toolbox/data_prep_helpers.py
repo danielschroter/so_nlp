@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from nltk.tokenize import sent_tokenize, word_tokenize
 import gensim
 from gensim.models import Word2Vec, FastText
+import numpy as np
 
 
 def sent_tokenize_text(txt):
@@ -38,6 +39,31 @@ def tokenize_text(dataframe, textcolumn):
     print(data[0])
     return data
 
+
+def generate_question_level_tokens(txt):
+    sents = sent_tokenize_text(txt)
+    words = [word_tokenize_sent(s) for s in sents]
+    return [item for sublist in words for item in sublist]  # flatten nested list
+
+
+def reduce_number_of_tags(dataframe, topTags):
+    """
+    # Reduce_number_of_tags within the dataset, and adjust the dataframe so that no empty tag entries are present
+    :param dataframe: Input Data, with 'tag' column,
+    :param topTags: Number of tags that should be used further
+    :return:
+    """
+    all_tags = np.array([tag for tags in dataframe["tags"] for tag in tags])
+    unique_tags = np.unique(all_tags, return_counts=True)
+    top_tags = unique_tags[0][np.argsort(unique_tags[1])[-101:]]  # keep 101, we will remove "python"
+    print(f"deleting element {top_tags[-1]} from top_tags")
+    top_tags = np.delete(top_tags, -1)
+
+    # remove tags that are not within top_101 and remove "python" tag
+    dataframe["tags"] = dataframe["tags"].apply(lambda x: [tag for tag in x if tag in top_tags])
+    # remove any tag lists that we potentially made empty by doing this
+    dataframe = dataframe[dataframe["tags"].apply(len) > 0]
+    return dataframe
 
 
 def create_Word2Vec_embeddings(dataframe, textcolumn):
@@ -94,3 +120,5 @@ def remove_html_tags(dataframe, columnnames):
     for name in columnnames:
         dataframe[name] = dataframe[name].apply(lambda text: BeautifulSoup(text, 'html.parser').get_text())
     return dataframe
+
+
