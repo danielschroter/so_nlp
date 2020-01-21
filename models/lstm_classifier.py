@@ -7,7 +7,7 @@ from tensorflow.keras.layers import Dense, LSTM
 # Model inputs: sequence of n x m word embeddings
 
 
-def create_model(lstm_layer_size=32, embedding_dim=128, output_dim=100):
+def create_model(lstm_layer_size=256, embedding_dim=128, output_dim=100):
     """
     creates and returns a simple LSTM model
     :param embedding_dim: size of the input embeddings
@@ -15,8 +15,10 @@ def create_model(lstm_layer_size=32, embedding_dim=128, output_dim=100):
     """
     model = Sequential()
     model.add(LSTM(lstm_layer_size, input_shape=(None, embedding_dim)))
+    model.add(Dense(256, activation="relu"))
+    model.add(Dense(128, activation="relu"))
     model.add(Dense(output_dim, activation="sigmoid"))
-    model.compile(loss="mean_squared_error", optimizer="adam")
+    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
     return model
 
 
