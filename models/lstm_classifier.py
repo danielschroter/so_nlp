@@ -3,6 +3,7 @@ import pandas as pd
 # example of a model defined with the sequential api
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, LSTM
+from losses.weighted_cross_entropy import WeightedBinaryCrossEntropy
 
 # Model inputs: sequence of n x m word embeddings
 
@@ -18,7 +19,7 @@ def create_model(lstm_layer_size=256, embedding_dim=128, output_dim=100):
     model.add(Dense(256, activation="relu"))
     model.add(Dense(128, activation="relu"))
     model.add(Dense(output_dim, activation="sigmoid"))
-    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
+    model.compile(loss=WeightedBinaryCrossEntropy(2, 1), optimizer="adam", metrics=["accuracy"])
     return model
 
 
