@@ -16,7 +16,7 @@ def sent_tokenize_text(txt):
     """
     txt = ' '.join(txt.split())  # replaces all whitespace with single space (including line-breaks)
     sents = sent_tokenize(txt)
-    sents = [s[:-1] for s in sents if s.endswith(".")]
+    sents = [s[:-1] if s.endswith(".") else s for s in sents]
     sents = [s.replace(",", "") for s in sents]
     return sents
 
