@@ -5,6 +5,8 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import gensim
 from gensim.models import Word2Vec, FastText
 import numpy as np
+import os
+import pickle
 
 
 def sent_tokenize_text(txt):
@@ -100,6 +102,15 @@ def load_data(data_path, drop_extra_columns=True):
     :param drop_extra_columns: whether to drop columns that are currently not relevant to the model (excl. question Id)
     :return: DataFrame where each row is one question with its top answer and a list of tags
     """
+
+    pkl_path = f"{data_path.split('/')[-1]}.pkl"
+    # load cache data pickle if it exists
+    if os.path.exists(pkl_path):
+        print("loading data from cached pickle")
+        with open(pkl_path, "rb") as in_file:
+            return pickle.load(in_file)
+    print("loading data from csv files")
+
     questions = pd.read_csv(f"{data_path}Questions.csv", encoding="ISO-8859-1")
     answers = pd.read_csv(f"{data_path}Answers.csv", encoding="ISO-8859-1")
     tags = pd.read_csv(f"{data_path}Tags.csv", encoding="ISO-8859-1")
@@ -113,6 +124,10 @@ def load_data(data_path, drop_extra_columns=True):
     if drop_extra_columns:
         df.drop(["Id_q", "OwnerUserId_q", "CreationDate_q", "Score_q", "Id_a", "OwnerUserId_a", "CreationDate_a",
                  "ParentId", "Score_a"], axis=1, inplace=True)
+
+    # cache resulting dataframe as pickle
+    with open(pkl_path, "wb") as out_file:
+        pickle.dump(df, out_file)
     return df
 
 
