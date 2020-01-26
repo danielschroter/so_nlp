@@ -87,7 +87,7 @@ def create_Word2Vec_embeddings(dataframe, textcolumn):
 
 def create_FastText_embeddings(dataframe, textcolumn):
     data = tokenize_text(dataframe, textcolumn)
-    model = FastText(min_count=1, size=100, window=3)
+    model = FastText(min_count=1, size=100, window=3, sg=1)
     model.build_vocab(sentences=data)
     model.train(sentences= data, total_examples=len(data), epochs=10)
     return model.wv

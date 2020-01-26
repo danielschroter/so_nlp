@@ -16,9 +16,10 @@ def evaluate_multiLabel(l_true, l_pred):
     print(f" Micro Evaluation: f1_Score= {f1_micro} , Recall = {recall_micro} , Precision = {precision_micro}")
 
 
-def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_true, l_pred, normalize_embeddings):
+
+def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_true, l_pred, normalize_embeddings, learning_rate, vocab_size):
     print(f"Model Evaluation\n")
-    print(f"normalize_embeddings = {normalize_embeddings}")
+    print(f"normalize_embeddings = {normalize_embeddings}, learning_rate = {learning_rate}, vocab_size = {vocab_size}")
     print(f"Parameter Settings:\n Sample size = {sample_size}, Max. number of words per question = {max_question_words}, Number of Top Labels used = {n_top_labels}\n")
     print(model.summary())
     print("\nMetrics:")
