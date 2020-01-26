@@ -56,11 +56,9 @@ def optimize_thres(predictions, true_binary):
     max_f1 = -1
     max_thres = -1
     for i in np.arange(0.0,1.0,0.01):
-        print(f"threshold is {i}")
         pred_bin = binarize_model_output(predictions, i)
         f1 = evaluate_multiLabel(true_binary, pred_bin, False)
         if f1 is not None and f1>max_f1:
             max_f1=f1
             max_thres=i
-    # print(f"Optimal parameters: f1_micro_score= {max_f1}, threshold = {max_thres}")
     return max_f1, max_thres
