@@ -95,7 +95,8 @@ def create_FastText_embeddings(dataframe, textcolumn):
     return model.wv
 
 
-def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_field="q_all_body_tokenized", content_field="Body_q"):
+def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_field="q_all_body_tokenized",
+              content_field="Body_q", include_answers=False):
     """
     loads question answer and tag data into one dataframe
     :param data_path: folder where Questions.csv, Answers.csv, Tags.csv are found. Must end with / (or \\ for Windows?)
@@ -103,7 +104,9 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
     :return: DataFrame where each row is one question with its top answer and a list of tags
     """
 
-    pkl_path = f"{data_path.split('/')[-2]}.pkl"
+    cache_folder = "cache"
+
+    pkl_path = f"{cache_folder}/{data_path.split('/')[-2]}.pkl"
     # load cache data pickle if it exists
     if not ignore_cache and os.path.exists(pkl_path):
         print("loading data from cached pickle")
@@ -111,23 +114,39 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
             return pickle.load(in_file)
     print("loading data from csv files")
 
+    if not os.path.exists(cache_folder):
+        os.mkdir(cache_folder)
+
     questions = pd.read_csv(f"{data_path}Questions.csv", encoding="ISO-8859-1")
-    answers = pd.read_csv(f"{data_path}Answers.csv", encoding="ISO-8859-1")
     tags = pd.read_csv(f"{data_path}Tags.csv", encoding="ISO-8859-1")
 
+    print("grouping tags")
+    grouped_tags = tags.groupby("Id").apply(lambda group: group["Tag"].tolist())
+
+    if include_answers:
+        print("loading and merging answers")
+        answers = pd.read_csv(f"{data_path}Answers.csv", encoding="ISO-8859-1")
+        top_answers = answers.groupby("ParentId").apply(lambda group: group.loc[group["Score"].idxmax()])
+        df = questions.merge(top_answers, how="inner", left_on="Id", right_index=True, suffixes=("_q", "_a"))
+        del answers, top_answers
+    else:
+        df = questions
+        df["Body_q"] = df["Body"]
+        df.drop(["Body"], axis=1, inplace=True)
+
     print("merging data")
-
-    grouped_tags = tags.groupby("Id").apply(lambda df: df["Tag"].tolist())
-    top_answers = answers.groupby("ParentId").apply(lambda df: df.loc[df["Score"].idxmax()])
-
-    df = questions.merge(top_answers, how="inner", left_on="Id", right_index=True, suffixes=("_q", "_a"))
     df = df.merge(grouped_tags.rename("tags"), how="left", left_on="Id", right_on="Id", suffixes=("", "_t"))
 
-    del questions, answers, tags, grouped_tags, top_answers
+    del questions, tags, grouped_tags
 
     if drop_extra_columns:
-        df.drop(["Id_q", "OwnerUserId_q", "CreationDate_q", "Score_q", "Id_a", "OwnerUserId_a", "CreationDate_a",
+        print("dropping extra columns")
+        if include_answers:
+            # df.drop(["Id_a", "OwnerUserId_a", "CreationDate_a", "Score_a"], inplace=True)
+            df.drop(["Id_q", "OwnerUserId_q", "CreationDate_q", "Score_q", "Id_a", "OwnerUserId_a", "CreationDate_a",
                  "ParentId", "Score_a"], axis=1, inplace=True)
+        else:
+            df.drop(["OwnerUserId", "CreationDate", "Score"], axis=1, inplace=True)
 
     print("removing html tags")
 
