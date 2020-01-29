@@ -115,20 +115,28 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
     answers = pd.read_csv(f"{data_path}Answers.csv", encoding="ISO-8859-1")
     tags = pd.read_csv(f"{data_path}Tags.csv", encoding="ISO-8859-1")
 
+    print("merging data")
+
     grouped_tags = tags.groupby("Id").apply(lambda df: df["Tag"].tolist())
     top_answers = answers.groupby("ParentId").apply(lambda df: df.loc[df["Score"].idxmax()])
 
     df = questions.merge(top_answers, how="inner", left_on="Id", right_index=True, suffixes=("_q", "_a"))
     df = df.merge(grouped_tags.rename("tags"), how="left", left_on="Id", right_on="Id", suffixes=("", "_t"))
 
+    del questions, answers, tags, grouped_tags, top_answers
+
     if drop_extra_columns:
         df.drop(["Id_q", "OwnerUserId_q", "CreationDate_q", "Score_q", "Id_a", "OwnerUserId_a", "CreationDate_a",
                  "ParentId", "Score_a"], axis=1, inplace=True)
 
+    print("removing html tags")
+
     remove_html_tags(df, ["Body_q"])
+    print("generating question level tokens")
     df[tokenized_field] = df[content_field].apply(generate_question_level_tokens)
 
     # cache resulting dataframe as pickle
+    print("caching dataframe")
     with open(pkl_path, "wb") as out_file:
         pickle.dump(df, out_file)
     return df
