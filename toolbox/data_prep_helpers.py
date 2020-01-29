@@ -95,7 +95,7 @@ def create_FastText_embeddings(dataframe, textcolumn):
     return model.wv
 
 
-def load_data(data_path, drop_extra_columns=True):
+def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_field="q_all_body_tokenized", content_field="Body_q"):
     """
     loads question answer and tag data into one dataframe
     :param data_path: folder where Questions.csv, Answers.csv, Tags.csv are found. Must end with / (or \\ for Windows?)
@@ -103,9 +103,9 @@ def load_data(data_path, drop_extra_columns=True):
     :return: DataFrame where each row is one question with its top answer and a list of tags
     """
 
-    pkl_path = f"{data_path.split('/')[-1]}.pkl"
+    pkl_path = f"{data_path.split('/')[-2]}.pkl"
     # load cache data pickle if it exists
-    if os.path.exists(pkl_path):
+    if not ignore_cache and os.path.exists(pkl_path):
         print("loading data from cached pickle")
         with open(pkl_path, "rb") as in_file:
             return pickle.load(in_file)
@@ -124,6 +124,9 @@ def load_data(data_path, drop_extra_columns=True):
     if drop_extra_columns:
         df.drop(["Id_q", "OwnerUserId_q", "CreationDate_q", "Score_q", "Id_a", "OwnerUserId_a", "CreationDate_a",
                  "ParentId", "Score_a"], axis=1, inplace=True)
+
+    remove_html_tags(df, ["Body_q"])
+    df[tokenized_field] = df[content_field].apply(generate_question_level_tokens)
 
     # cache resulting dataframe as pickle
     with open(pkl_path, "wb") as out_file:
