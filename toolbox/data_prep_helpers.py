@@ -1,12 +1,13 @@
 import pandas as pd
 import pickle
+import joblib
 from bs4 import BeautifulSoup
 from nltk.tokenize import sent_tokenize, word_tokenize
 import gensim
 from gensim.models import Word2Vec, FastText
 import numpy as np
 import os
-import pickle
+import math
 
 
 def sent_tokenize_text(txt):
@@ -106,12 +107,12 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
 
     cache_folder = "cache"
 
+    c1_path = f"{cache_folder}/{data_path.split('/')[-2]}_0.pkl"
     pkl_path = f"{cache_folder}/{data_path.split('/')[-2]}.pkl"
     # load cache data pickle if it exists
-    if not ignore_cache and os.path.exists(pkl_path):
+    if not ignore_cache and os.path.exists(c1_path):
         print("loading data from cached pickle")
-        with open(pkl_path, "rb") as in_file:
-            return pickle.load(in_file)
+        return load_cached_chunked_data(c1_path.replace("_0.pkl", ""))
     print("loading data from csv files")
 
     if not os.path.exists(cache_folder):
@@ -138,7 +139,6 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
     df = df.merge(grouped_tags.rename("tags"), how="left", left_on="Id", right_on="Id", suffixes=("", "_t"))
 
     del questions, tags, grouped_tags
-
     if drop_extra_columns:
         print("dropping extra columns")
         if include_answers:
@@ -148,17 +148,44 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
         else:
             df.drop(["OwnerUserId", "CreationDate", "Score"], axis=1, inplace=True)
 
-    print("removing html tags")
+    chunk_size = 10000
+    num_chunks = math.ceil(df.shape[0] / chunk_size)
+    for i in range(num_chunks):
+        chunk = df[i*chunk_size: (i+1)*chunk_size]
+        print(f"parsing chunk {i+1}/{num_chunks}")
+        #print(f"{i}: removing html tags")
 
-    remove_html_tags(df, ["Body_q"])
-    print("generating question level tokens")
-    df[tokenized_field] = df[content_field].apply(generate_question_level_tokens)
+        remove_html_tags(chunk, ["Body_q"])
+        #print(f"{i}: generating question level tokens")
+        chunk[tokenized_field] = chunk[content_field].apply(generate_question_level_tokens)
+        chunk = chunk[tokenized_field.apply(len) > 0]
 
-    # cache resulting dataframe as pickle
-    print("caching dataframe")
-    with open(pkl_path, "wb") as out_file:
-        pickle.dump(df, out_file)
-    return df
+        # cache resulting dataframe as pickle
+        #print(f"{i}: caching dataframe")
+        # with open(pkl_path, "wb") as out_file:
+        chunk_path = pkl_path.replace(".pkl", f"_{i}.pkl")
+        joblib.dump(chunk, chunk_path)
+
+    del df
+    return load_cached_chunked_data(pkl_path.replace(".pkl", ""))
+
+
+def load_cached_chunked_data(prefix):
+    i = 0
+    df = None
+    while True:
+        chunk_path = prefix + f"_{i}.pkl"
+        if not os.path.exists(chunk_path):
+            return df
+        print(f"reading chunk {i}")
+        chunk = joblib.load(chunk_path)
+        #print(chunk.shape)
+        #print(chunk.iloc[0])
+        if df is None:
+            df = chunk
+        else:
+            df = df.append(chunk)
+        i += 1
 
 
 def remove_html_tags(dataframe, columnnames):
