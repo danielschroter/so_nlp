@@ -177,7 +177,6 @@ def load_cached_chunked_data(prefix):
         chunk_path = prefix + f"_{i}.pkl"
         if not os.path.exists(chunk_path):
             return df
-        print(f"reading chunk {i}")
         chunk = joblib.load(chunk_path)
         #print(chunk.shape)
         #print(chunk.iloc[0])
