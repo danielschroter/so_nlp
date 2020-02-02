@@ -1,5 +1,6 @@
 from sklearn.metrics import f1_score, hamming_loss, recall_score, precision_score
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def binarize_model_output(y, threshold=0.5):
@@ -17,7 +18,7 @@ def evaluate_multiLabel(l_true, l_pred, printOutput):
         print(f" Macro Evaluation: f1_Score= {f1_macro} , Recall = {recall_macro} , Precision = {precision_macro}")
         print(f" Micro Evaluation: f1_Score= {f1_micro} , Recall = {recall_micro} , Precision = {precision_micro}")
 
-    return f1_micro
+    return f1_micro, precision_micro, recall_micro
 
 
 def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_true, predictions, normalize_embeddings, learning_rate, vocab_size, n_epochs, thres=None):
@@ -52,13 +53,28 @@ def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_tr
         evaluate_multiLabel(l_true, l_pred, True)
 
 
-def optimize_thres(predictions, true_binary):
+def optimize_thres(predictions, true_binary, plot=True):
     max_f1 = -1
     max_thres = -1
+    f1s = []
+    precs = []
+    recs = []
+    thress = []
     for i in np.arange(0.0,1.0,0.01):
         pred_bin = binarize_model_output(predictions, i)
-        f1 = evaluate_multiLabel(true_binary, pred_bin, False)
+        f1, prec, rec = evaluate_multiLabel(true_binary, pred_bin, False)
+        f1s.append(f1)
+        precs.append(prec)
+        recs.append(rec)
+        thress.append(i)
         if f1 is not None and f1>max_f1:
             max_f1=f1
             max_thres=i
+
+    if plot:
+        plt.figure(figsize=(15, 8))
+        plt.plot(thress, f1s)
+        plt.plot(thress, precs)
+        plt.plot(thress, recs)
+        plt.show()
     return max_f1, max_thres
