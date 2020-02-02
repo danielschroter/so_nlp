@@ -8,7 +8,7 @@ from losses.weighted_cross_entropy import WeightedBinaryCrossEntropy
 # Model inputs: sequence of n x m word embeddings
 
 
-def create_model(lstm_layer_size=256, embedding_dim=128, output_dim=100, mask_value=None):
+def create_model(lstm_layer_size=256, embedding_dim=128, output_dim=100, mask_value=None, num_mid_dense=0):
     """
     creates and returns a simple LSTM model
     :param embedding_dim: size of the input embeddings
@@ -24,8 +24,12 @@ def create_model(lstm_layer_size=256, embedding_dim=128, output_dim=100, mask_va
     lstm_body = LSTM(lstm_layer_size)(mask_body)
     
     concat = concatenate([lstm_title, lstm_body])
+
+    next = concat
+    for i in range(num_mid_dense):
+        next = Dense(128, activation="relu")(next)
     
-    output = Dense(output_dim, activation="sigmoid")(concat)
+    output = Dense(output_dim, activation="sigmoid")(next)
     
     model = Model(inputs=[x_title, x_body], outputs=[output])
     model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
