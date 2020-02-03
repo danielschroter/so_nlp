@@ -30,11 +30,22 @@ def word_tokenize_sent(s):
 
 
 def load_fasttext_embeddings(path):
+    """
+    Loads trained embeddings
+    :param path: path to the location of the embeddings
+    :return:
+    """
     with open(path, "rb") as in_file:
         return pickle.load(in_file)
 
 
 def tokenize_text(dataframe, textcolumn):
+    """
+    Helper Function that generates word tokens on a sentence level
+    :param dataframe: Data
+    :param textcolumn: Columname of dataframe containing the text
+    :return: nested list with tokens for each sentence.
+    """
     sentences = []
     for i, row in dataframe.iterrows():
         txt = row[textcolumn]
@@ -50,6 +61,11 @@ def tokenize_text(dataframe, textcolumn):
 
 
 def generate_question_level_tokens(txt):
+    """
+    Method generates a list where each entry is a list containing the words per question
+    :param txt: txt to be tokenized
+    :return: a flattened nested list containing the tokens per question
+    """
     sents = sent_tokenize_text(txt)
     words = [word_tokenize_sent(s) for s in sents]
     return [item for sublist in words for item in sublist]  # flatten nested list
@@ -89,7 +105,9 @@ def create_Word2Vec_embeddings(dataframe, textcolumn):
 
 
 def create_FastText_embeddings(dataframe, textcolumn):
-    data = tokenize_text(dataframe, textcolumn)
+    #data = tokenize_text(dataframe, textcolumn)
+    print("Start training of WE")
+    data = dataframe["q_all_body_tokenized"].tolist()
     model = FastText(min_count=1, size=100, window=3, sg=1)
     model.build_vocab(sentences=data)
     model.train(sentences= data, total_examples=len(data), epochs=10)
@@ -171,6 +189,11 @@ def load_data(data_path, drop_extra_columns=True, ignore_cache=False, tokenized_
 
 
 def load_cached_chunked_data(prefix):
+    """
+
+    :param prefix:
+    :return:
+    """
     i = 0
     df = None
     while True:

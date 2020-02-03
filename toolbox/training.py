@@ -23,7 +23,7 @@ def grid_search_es(X, y, create_model: Callable, search_params: Dict[str, List],
     """
     all_hists = []
 
-    split_states = [42, 69, 2020]
+    split_states = [42, 2020]
 
     # print(list(search_params.values()))
     # print(list(itertools.product(*list(search_params.values()))))
@@ -39,7 +39,13 @@ def grid_search_es(X, y, create_model: Callable, search_params: Dict[str, List],
         hists = []
         val_loss = 0.0
         for rs in split_states:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=rs)
+            # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=rs)
+            if len(X) == 2:
+                X_train_z, X_test_z, y_train, y_test = train_test_split(list(zip(*X)), y, test_size=0.2, random_state=rs)
+                X_train = list(zip(*X_train_z))
+                X_test = list(zip(*X_test_z))
+            else:
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=rs)
             model = create_model(**params)
             hist = model.fit(X_train, y_train, batch_size=128, validation_data=[X_test, y_test], epochs=max_epochs,
                              verbose=0, callbacks=callbacks)
