@@ -8,6 +8,7 @@ We have developed several approaches to solving this problem and present them in
   * [1. Bag of Words Model](#1-bag-of-words-model)
   * [2. Linear LSTM model for Title OR Body](#2-linear-lstm-model-for-title-or-body)
   * [3. Multi-Input LSTM for Title and Body](#3-multi-input-lstm-for-title-and-body)
+- [Hyperparameter Tuning](#hyperparameter-tuning)
 - [Comparison of Results](#comparison-of-results)
   * [Basis for Evaluation](#basis-for-evaluation)
   * [Results](#results)
@@ -40,6 +41,11 @@ We provide a visualization of the model architecture below. For this visual exam
 * lstm size (each): 64
 
 ![model architecture](graphics/title_body_model.svg)
+
+## Hyperparameter Tuning
+We optimize parameters using a custom grid search approach, which can be found [here](toolbox/training.py). 
+
+We create 2 train/test splits, each with a test_size of 0.2 on which we train each combination of supplied possible hyperparameters. Each training is conducted up to a maximum 100 epochs, where EarlyStopping allows us to stop early if the best validation_loss has not been improved after a number of epochs. We then take the minimum validation loss (not necessarily at the last step) for each training run of a hyperparameter combination and average them to score the parameters. We consider the parameter combination with the best average minimum validation loss to be the best configuration.
 
 ## Comparison of Results
 
