@@ -32,6 +32,8 @@ def grid_search_es(X, y, create_model: Callable, search_params: Dict[str, List],
         params = {k: v for k, v in zip(search_params.keys(), params_l)}
         print(params)
         t_start = time.time()
+        # we use EarlyStopping with patience 10 because our models tend to only start improving after about 5-10 epochs
+        # of training
         callbacks = [
             EarlyStopping(monitor="val_loss", patience=10),
         ]
@@ -39,9 +41,17 @@ def grid_search_es(X, y, create_model: Callable, search_params: Dict[str, List],
         hists = []
         val_loss = 0.0
         for rs in split_states:
-            # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=rs)
+            # if X is a list of title and body training data, we need to take some extra steps to splitting it into
+            # train and test sets
             if len(X) == 2:
-                X_train_z, X_test_z, y_train, y_test = train_test_split(list(zip(*X)), y, test_size=0.2, random_state=rs)
+                # list(zip(*X)) converts the X = [X_title, X_body] to a list of 2-tuples [(X_title_i, X_body_i), ...]
+                # where each tuple contains a single X_title and X_body element. This is necessary because
+                # train_test_split splits a single list.
+                X_train_z, X_test_z, y_train, y_test = train_test_split(list(zip(*X)), y, test_size=0.2,
+                                                                        random_state=rs)
+                # we need to "unzip" the zipped X_train_z and X_test_z because for the fit call, we again need a list of
+                # length 2 that contains a list of X_title and X_body in the form X_test = [X_test_title, X_test_body]
+                # where X_test_title and X_test_body are lists of embedded title / body tokens
                 X_train = list(zip(*X_train_z))
                 X_test = list(zip(*X_test_z))
             else:
