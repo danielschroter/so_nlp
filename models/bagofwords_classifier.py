@@ -13,8 +13,10 @@ def create_model(input_layer_size=256, vocab_size=1000, output_dim=100):
     model = Sequential()
     model.add(Dense(input_layer_size, input_shape=(vocab_size,)))
     model.add(Activation('relu'))
+    model.add(Dropout(0.3))
     model.add(Dense(output_dim))
     model.add(Activation('sigmoid'))
+    model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
     return model
 
 

@@ -1,6 +1,7 @@
 from sklearn.metrics import f1_score, hamming_loss, recall_score, precision_score
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 
 
 def binarize_model_output(y, threshold=0.5):
@@ -21,7 +22,8 @@ def evaluate_multiLabel(l_true, l_pred, printOutput):
     return f1_micro, precision_micro, recall_micro
 
 
-def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_true, predictions, normalize_embeddings, learning_rate, vocab_size, n_epochs, thres=None):
+def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_true, predictions, normalize_embeddings,
+                      learning_rate, vocab_size, n_epochs, thres=None, f1_pickle_name=None):
     """
 
     :param model:
@@ -42,7 +44,7 @@ def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_tr
     print(f"Parameter Settings:\n Sample size = {sample_size}, Max. number of words per question = {max_question_words}, Number of Top Labels used = {n_top_labels}\n")
     print(model.summary())
     if thres is None:
-        max_f1, max_thres = optimize_thres(predictions, l_true)
+        max_f1, max_thres = optimize_thres(predictions, l_true, f1_pickle_name=f1_pickle_name)
         print(f"\nMetrics with optimized threshold of {max_thres}")
         l_pred = binarize_model_output(predictions, max_thres)
         evaluate_multiLabel(l_true, l_pred, True)
@@ -53,7 +55,7 @@ def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_tr
         evaluate_multiLabel(l_true, l_pred, True)
 
 
-def optimize_thres(predictions, true_binary, plot=True):
+def optimize_thres(predictions, true_binary, plot=True, f1_pickle_name=None):
     max_f1 = -1
     max_thres = -1
     f1s = []
@@ -70,6 +72,10 @@ def optimize_thres(predictions, true_binary, plot=True):
         if f1 is not None and f1>max_f1:
             max_f1=f1
             max_thres=i
+
+    if f1_pickle_name is not None:
+        with open(f1_pickle_name, "wb") as out_file:
+            pickle.dump((thress, f1s), out_file)
 
     if plot:
         plt.figure(figsize=(15, 8))
