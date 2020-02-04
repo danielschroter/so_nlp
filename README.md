@@ -67,7 +67,7 @@ We will present the results for our three models:
 | model | f1 score | precision | recall | threshold |
 |-------|----------|-----------|--------|-----------|
 | bow   | 0.622    | 0.667     | 0.582  | 0.30      |
-| qb    |          |           |        |           |
+| qb    | 0.605    | 0.675     | 0.548  | 0.35      |
 | qbt   |          |           |        |           |
 
 **Comparison of Results**
