@@ -12,6 +12,9 @@ We have developed several approaches to solving this problem and present them in
 - [Comparison of Results](#comparison-of-results)
   * [Basis for Evaluation](#basis-for-evaluation)
   * [Results](#results)
+  
+## The "Presentation" Pipeline
+We have created a jupyter notebook containing a data-processing/training/evaulation pipeline that can be used for presentational purposes and also acts as an entry point to understand the structure and processes of the remaining notebooks. Please have a look at [presentation_pipeline.ipynb](presentation_pipeline.ipynb) to achieve a better understanding of the steps if necessary.
 
 ## The Models
 We present the different model architectures in this section. Each of the three model architectures has an associated notebook that leads through the data processing and model training process.
