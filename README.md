@@ -4,6 +4,14 @@ This repository contains the code we developed for our project as part of the Ap
 
 We have developed several approaches to solving this problem and present them in notebooks within this project.
 
+- [The Models](#the-models)
+  * [1. Bag of Words Model](#1-bag-of-words-model)
+  * [2. Linear LSTM model for Title OR Body](#2-linear-lstm-model-for-title-or-body)
+  * [3. Multi-Input LSTM for Title and Body](#3-multi-input-lstm-for-title-and-body)
+- [Comparison of Results](#comparison-of-results)
+  * [Basis for Evaluation](#basis-for-evaluation)
+  * [Results](#results)
+
 ## The Models
 We present the different model architectures in this section. Each of the three model architectures has an associated notebook that leads through the data processing and model training process.
 
@@ -35,4 +43,23 @@ We provide a visualization of the model architecture below. For this visual exam
 
 ## Comparison of Results
 
+### Basis for Evaluation
+Our metric for model evaluation is the micro [f1 score](https://towardsdatascience.com/accuracy-precision-recall-or-f1-331fb37c5cb9), calculated over all samples in the validation set. In contrast to multilabel single-class classification problems, we cannot just pick the predicted target label with the highest score, since we want to predict *multiple* labels. 
 
+This means that we have to set some threshold that dictates how high a tag's score must be for us to consider it set. Since we don't know the best threshold in advance, we iterate over all 100 possible thresholds from 0.00, 0.01, 0.02 ... 0.99, 1.00 and select the one resulting in the best f1 score.
+
+We will present the results for our three models:
+* *bow*: bag of words model, not optimized
+* *qb*: question body model with 1 intermediary dense layer, not optimized
+* *qbt*: question body and title model optimized via gridsearch
+
+### Results
+
+| model | f1 score | precision | recall | threshold |
+|-------|----------|-----------|--------|-----------|
+| bow   | 0.622    | 0.667     | 0.582  | 0.30      |
+| qb    |          |           |        |           |
+| qbt   |          |           |        |           |
+
+**Comparison of Results**
+-- Graphic goes here -- 
