@@ -48,11 +48,13 @@ def output_evaluation(model, sample_size, max_question_words, n_top_labels, l_tr
         print(f"\nMetrics with optimized threshold of {max_thres}")
         l_pred = binarize_model_output(predictions, max_thres)
         evaluate_multiLabel(l_true, l_pred, True)
+        return max_thres
 
     else:
         print(f"\nMetrics without optimized thres of {thres}")
         l_pred=binarize_model_output(predictions, thres)
         evaluate_multiLabel(l_true, l_pred, True)
+        return thres
 
 
 def optimize_thres(predictions, true_binary, plot=True, f1_pickle_name=None):
