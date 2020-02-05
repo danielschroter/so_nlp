@@ -1,3 +1,5 @@
+from typing import List
+
 from sklearn.metrics import f1_score, hamming_loss, recall_score, precision_score
 import numpy as np
 import matplotlib.pyplot as plt
@@ -86,3 +88,30 @@ def optimize_thres(predictions, true_binary, plot=True, f1_pickle_name=None):
         plt.plot(thress, recs)
         plt.show()
     return max_f1, max_thres
+
+
+def compare_f1_plots(f1_pickle_files: List[str], labels: List[str]):
+    """
+    Loads a number of f1 pickle files for evaluation and displays them along with the given matching tags
+    :param f1_pickle_files: list of pickle files containing (thresholds, f1_scores) tuples
+    :param labels: list of labels to attach to the f1 plots. Must be of same length as f1_pickle_files
+    """
+    thress = None
+    all_f1s = []
+    for f in f1_pickle_files:
+        with open(f, "rb") as in_file:
+            ts, f1s = pickle.load(in_file)
+            if thress is None:
+                thress = ts
+            else:
+                if not all([a == b for a, b in zip(thress, ts)]):
+                    raise Exception("Different threshold between f1 pickles!")
+            all_f1s.append(f1s)
+
+    colors = [f"C{i}" for i in range(len(all_f1s))]
+    plt.figure(figsize=(16, 8))
+    for f1s, label, c in zip(all_f1s, labels, colors):
+        plt.plot(thress, f1s, label=label, color=c)
+    plt.ylim(0.5, 0.7)
+    plt.legend()
+    plt.show()
