@@ -83,9 +83,10 @@ def optimize_thres(predictions, true_binary, plot=True, f1_pickle_name=None):
 
     if plot:
         plt.figure(figsize=(15, 8))
-        plt.plot(thress, f1s)
-        plt.plot(thress, precs)
-        plt.plot(thress, recs)
+        plt.plot(thress, f1s, label="f1")
+        plt.plot(thress, precs, label="precision")
+        plt.plot(thress, recs, label="recall")
+        plt.legend()
         plt.show()
     return max_f1, max_thres
 
