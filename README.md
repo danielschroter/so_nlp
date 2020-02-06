@@ -25,6 +25,7 @@ For the simplest of our models we simply encode word occurrences as a single one
 These embeddings are then fed into a simple sequential model with 2 fully connected layers, using relu as the activation function of the first and sigmoid for the output layer.
 
 Data processing, model construction and training can be explored in [Bag_of_words.ipynb](Bag_of_words.ipynb).
+This approach was also used in an google tutorial at (https://cloud.google.com/blog/products/gcp/intro-to-text-classification-with-keras-automatically-tagging-stack-overflow-posts)
 
 ### 2. Linear LSTM model for Title OR Body
 
