@@ -70,7 +70,7 @@ We will present the results for our three models:
 |-------|----------|-----------|--------|-----------|
 | bow   | 0.622    | 0.667     | 0.582  | 0.30      |
 | qb    | 0.605    | 0.675     | 0.548  | 0.35      |
-| qbt   |          |           |        |           |
+| qbt   | 0.657    | 0.74      | 0.575  | 0.38          |
 
 **Comparison of Results**
 -- Graphic goes here -- 
